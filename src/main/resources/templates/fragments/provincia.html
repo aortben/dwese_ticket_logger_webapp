@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Ticket Logger - Listado de Provincias')"></head>
+<body>
+<header th:replace="fragments/header :: header"></header>
+
+<main class="container mt-5">
+    <h1>Provincias</h1>
+
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <table class="table table-bordered mt-3">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Comunidad Autónoma</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="provincia : ${listProvincias}">
+            <td th:text="${provincia.id}"></td>
+            <td th:text="${provincia.code}"></td>
+            <td th:text="${provincia.name}"></td>
+            <td th:text="${provincia.comunidadId}"></td>
+            <td>
+                <a th:href="@{/provincias/edit/{id}(id=${provincia.id})}" class="btn btn-primary btn-sm">Editar</a>
+                <form th:action="@{/provincias/delete/{id}(id=${provincia.id})}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm"
+                            th:onclick="|return confirm('¿Seguro que deseas eliminar esta provincia?');|">
+                        Eliminar
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/provincias/new}" class="btn btn-success mt-3">Añadir Nueva Provincia</a>
+    <a th:href="@{/}" class="btn btn-secondary mt-3">Volver al Inicio</a>
+</main>
+
+<footer th:replace="fragments/footer :: footer"></footer>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Ticket Logger - Listado de Comunidades Autónomas')"></head>
+<body>
+<header th:replace="fragments/header :: header"></header>
+
+<main class="container mt-5">
+    <h1>Comunidades Autónomas</h1>
+
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <table class="table table-bordered mt-3">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Región</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="comunidad : ${listComunidades}">
+            <td th:text="${comunidad.id}"></td>
+            <td th:text="${comunidad.code}"></td>
+            <td th:text="${comunidad.name}"></td>
+            <td th:text="${comunidad.regionId}"></td>
+            <td>
+                <a th:href="@{/comunidades/edit(id=${comunidad.id})}" class="btn btn-primary btn-sm">Editar</a>
+                <form th:action="@{/comunidades/delete}" method="post" class="d-inline">
+                    <input type="hidden" name="id" th:value="${comunidad.id}" />
+                    <button type="submit" class="btn btn-danger btn-sm"
+                            th:onclick="|return confirm('¿Seguro que deseas eliminar esta comunidad?');|">Eliminar
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/comunidades/new}" class="btn btn-success mt-3">Añadir Nueva Comunidad</a>
+    <a th:href="@{/}" class="btn btn-secondary mt-3">Volver al Inicio</a>
+</main>
+
+<footer th:replace="fragments/footer :: footer"></footer>
+</body>
+</html>
