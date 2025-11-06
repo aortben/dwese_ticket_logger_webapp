@@ -42,7 +42,7 @@ public class ComunidadAutonomaController {
             logger.error("Error al listar comunidades autónomas: {}", e.getMessage());
             model.addAttribute("errorMessage", "Error al listar las comunidades autónomas.");
         }
-        return "/fragments/comunidad";
+        return "/comunidad";
     }
 
     @GetMapping("/new")
@@ -54,7 +54,7 @@ public class ComunidadAutonomaController {
         } catch (SQLException e) {
             logger.error("Error al cargar las regiones: {}", e.getMessage());
         }
-        return "/fragments/comunidad-form";
+        return "/comunidad-form";
     }
 
     @GetMapping("/edit")
@@ -68,7 +68,7 @@ public class ComunidadAutonomaController {
             logger.error("Error al obtener la comunidad: {}", e.getMessage());
             model.addAttribute("errorMessage", "Error al obtener la comunidad.");
         }
-        return "/fragments/comunidad-form";
+        return "/comunidad-form";
     }
 
     @PostMapping("/insert")

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/head :: head('Ticket Logger - Insertar/Actualizar Provincia')"></head>
+<head th:replace="fragments/head :: head('Ticket Logger - Insert/Update Province')"></head>
 <body>
 <header th:replace="fragments/header :: header"></header>
 
 <main class="container mt-5">
-    <h1 th:text="${provincia.id == null ? 'Añadir Nueva Provincia' : 'Editar Provincia'}"></h1>
+    <h1 th:text="${provincia.id == null ? 'Add New Province' : 'Edit Province'}"></h1>
 
     <div th:if="${errorMessage}" class="alert alert-danger">
         <p th:text="${errorMessage}"></p>
     </div>
 
-    <form th:action="${provincia.id == null} ? @{/provincias/insert} : @{/provincias/update}"
+    <form th:action="${provincia.id == null} ? @{/provinces/insert} : @{/provinces/update}"
           th:object="${provincia}" method="post" class="mt-4">
 
         <input type="hidden" th:field="*{id}" />
@@ -27,20 +27,24 @@
         </div>
 
         <div class="mb-3">
-            <label for="comunidadId" class="form-label">Comunidad Autónoma:</label>
+            <label for="comunidadId" class="form-label">Autonomous Community:</label>
             <select th:field="*{comunidadId}" id="comunidadId" class="form-select" required>
-                <option value="">-- Selecciona a Community --</option>
-                <option th:each="comunidad : ${listComunidades}" th:value="${comunidad.id}" th:text="${comunidad.name}"></option>
+                <option value="">-- Select a Community --</option>
+                <option th:each="comunidad : ${comunidades}"
+                        th:value="${comunidad.id}"
+                        th:text="${comunidad.name}">
+                </option>
             </select>
         </div>
 
         <button type="submit" class="btn btn-primary"
-                th:text="${provincia.id == null ? 'Crear' : 'Actualizar'}"></button>
+                th:text="${provincia.id == null ? 'Create' : 'Update'}"></button>
     </form>
 
-    <a th:href="@{/provincias}" class="btn btn-secondary mt-3">Back To List</a>
+    <a th:href="@{/provinces}" class="btn btn-secondary mt-3">Back To List</a>
 </main>
 
 <footer th:replace="fragments/footer :: footer"></footer>
 </body>
 </html>
+

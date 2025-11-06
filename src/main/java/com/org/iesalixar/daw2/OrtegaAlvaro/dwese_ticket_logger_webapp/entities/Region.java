@@ -3,6 +3,13 @@ package com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+
 /**
  * La clase `Region` representa una entidad que modela una región dentro de la
  base de datos.
@@ -33,8 +40,12 @@ public class Region {
     private Long id;
     // Campo que almacena el código de la región, normalmente una cadena cortaque identifica la región.
     // Ejemplo: "01" para Andalucía.
+    @NotEmpty(message = "El código no puede estar vacío")
+    @Size(max = 2, message = "El código no puede tener más de 2 caracteres")
     private String code;
     // Campo que almacena el nombre completo de la región, como "Andalucía" o"Cataluña".
+    @NotEmpty(message = "El nombre no puede estar vacío")
+    @Size(max = 100, message = "El nombre no puede tener más de 100 caracteres")
     private String name;
     /**
      * Este es un constructor personalizado que no incluye el campo `id`.

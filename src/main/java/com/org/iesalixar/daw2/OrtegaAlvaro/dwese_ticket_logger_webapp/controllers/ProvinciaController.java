@@ -42,7 +42,7 @@ public class ProvinciaController {
             logger.error("Error al listar provincias: {}", e.getMessage());
             model.addAttribute("errorMessage", "Error al listar las provincias.");
         }
-        return "/fragments/provincia";
+        return "/provincia";
     }
 
     @GetMapping("/new")
@@ -54,7 +54,7 @@ public class ProvinciaController {
         } catch (SQLException e) {
             logger.error("Error al cargar comunidades: {}", e.getMessage());
         }
-        return "/fragments/provincia-form";
+        return "/provincia-form";
     }
 
     @GetMapping("/edit")
@@ -68,7 +68,7 @@ public class ProvinciaController {
             logger.error("Error al obtener provincia: {}", e.getMessage());
             model.addAttribute("errorMessage", "Error al obtener la provincia.");
         }
-        return "/fragments/provincia-form";
+        return "/provincia-form";
     }
 
     @PostMapping("/insert")

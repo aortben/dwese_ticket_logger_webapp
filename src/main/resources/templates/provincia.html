@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/head :: head('Ticket Logger - Listado de Provincias')"></head>
+<head th:replace="fragments/head :: head('Ticket Logger - Provinces List')"></head>
 <body>
 <header th:replace="fragments/header :: header"></header>
 
@@ -17,7 +17,7 @@
             <th>ID</th>
             <th>Code</th>
             <th>Name</th>
-            <th>Comunidad Autónoma</th>
+            <th>Autonomous Community</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -27,12 +27,14 @@
             <td th:text="${provincia.code}"></td>
             <td th:text="${provincia.name}"></td>
             <td th:text="${provincia.comunidadId}"></td>
+
             <td>
-                <a th:href="@{/provincias/edit/{id}(id=${provincia.id})}" class="btn btn-primary btn-sm">Editar</a>
-                <form th:action="@{/provincias/delete/{id}(id=${provincia.id})}" method="post" class="d-inline">
+                <a th:href="@{/provinces/edit(id=${provincia.id})}" class="btn btn-primary btn-sm">Edit</a>
+
+                <form th:action="@{/provinces/delete(id=${provincia.id})}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger btn-sm"
-                            th:onclick="|return confirm('¿Seguro que deseas eliminar esta provincia?');|">
-                        Eliminar
+                            onclick="return confirm('Are you sure you want to delete this province?');">
+                        Delete
                     </button>
                 </form>
             </td>
@@ -40,8 +42,8 @@
         </tbody>
     </table>
 
-    <a th:href="@{/provincias/new}" class="btn btn-success mt-3">Añadir Nueva Provincia</a>
-    <a th:href="@{/}" class="btn btn-secondary mt-3">Volver al Inicio</a>
+    <a th:href="@{/provinces/new}" class="btn btn-success mt-3">Add New Province</a>
+    <a th:href="@{/}" class="btn btn-secondary mt-3">Return Home</a>
 </main>
 
 <footer th:replace="fragments/footer :: footer"></footer>
