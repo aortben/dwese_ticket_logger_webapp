@@ -98,7 +98,7 @@ public class RegionDAOImpl implements RegionDAO {
     public boolean existsRegionByCode(String code) {
         logger.info("Checking if region with code: {} exists", code);
         String sql = "SELECT COUNT(*) FROM regions WHERE UPPER(code) = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, code.toUpperCase());
+        Long count = jdbcTemplate.queryForObject(sql, Long.class, code.toUpperCase());
         boolean exists = count != null && count > 0;
         logger.info("Region with code: {} exists: {}", code, exists);
         return exists;
@@ -117,7 +117,7 @@ public class RegionDAOImpl implements RegionDAO {
     public boolean existsRegionByCodeAndNotId(String code, Long id) {
         logger.info("Checking if region with code: {} exists excluding id: {}", code, id);
         String sql = "SELECT COUNT(*) FROM regions WHERE UPPER(code) = ? AND id != ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, code.toUpperCase(), id);
+        Long count = jdbcTemplate.queryForObject(sql, Long.class, code.toUpperCase(), id);
         boolean exists = count != null && count > 0;
         logger.info("Region with code: {} exists excluding id {}: {}", code, id, exists);
         return exists;
