@@ -2,18 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/head :: head(#{msg.region.title})"></head>
 <body>
-<!-- Incluir el fragmento del header -->
 <header th:replace="fragments/header :: header"></header>
 
 <main class="container mt-5">
     <h1 th:text="#{msg.region.header}">Regions</h1>
 
-    <!-- Muestra un mensaje de error si hay algún problema -->
-    <div th:if="${errorMessage}" class="alert alert-danger">
-        <p th:text="${errorMessage}"></p>
-    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
-    <!-- Muestra la lista de regiones en una tabla -->
     <table class="table table-bordered mt-3">
         <thead>
         <tr>
@@ -29,12 +24,10 @@
             <td th:text="${region.code}"></td>
             <td th:text="${region.name}"></td>
             <td>
-                <!-- Botón para editar -->
                 <a th:href="@{/regions/edit(id=${region.id})}"
                    class="btn btn-primary btn-sm"
                    th:text="#{msg.region.edit}">Edit</a>
 
-                <!-- Botón para eliminar -->
                 <form th:action="@{/regions/delete}" method="post" class="d-inline">
                     <input type="hidden" name="id" th:value="${region.id}"/>
                     <button type="submit" class="btn btn-danger btn-sm"
@@ -44,22 +37,26 @@
                     </button>
                 </form>
             </td>
+
+            <!-- Imagen comentada porque Region no tiene la propiedad 'image' -->
+            <!--
+            <td>
+                <img th:if="${region.image != null}"
+                     th:src="@{'/uploads/' + ${region.image}}"
+                     alt="Imagen de la región"
+                     style="width: 100px; height: 100px; object-fit: cover;" />
+                <span th:if="${region.image == null}" th:text="#{msg.category.noImage}"></span>
+            </td>
+            -->
         </tr>
         </tbody>
     </table>
 
-    <!-- Botón para añadir una nueva región -->
-    <a th:href="@{/regions/new}"
-       class="btn btn-success mt-3"
-       th:text="#{msg.region.addNew}">Add New Region</a>
-
-    <!-- Volver a la página principal -->
-    <a th:href="@{/}"
-       class="btn btn-secondary mt-3"
-       th:text="#{msg.region.backHome}">Back to Home</a>
+    <a th:href="@{/regions/new}" class="btn btn-success mt-3" th:text="#{msg.region.addNew}">Add New Region</a>
+    <a th:href="@{/}" class="btn btn-secondary mt-3" th:text="#{msg.region.backHome}">Back to Home</a>
 </main>
 
-<!-- Incluir el fragmento del footer -->
 <footer th:replace="fragments/footer :: footer"></footer>
 </body>
 </html>
+

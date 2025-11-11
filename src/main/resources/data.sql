@@ -1,5 +1,5 @@
--- Inserts de las Comunidades Autónomas, ignora si se produce un error en la insercción
-INSERT IGNORE INTO regions (id, code, name) VALUES
+-- Regiones
+INSERT IGNORE INTO region (id, code, name) VALUES
 (1, '01', 'NORTE'),
 (2, '02', 'SUR'),
 (3, '03', 'ESTE'),
@@ -9,8 +9,8 @@ INSERT IGNORE INTO regions (id, code, name) VALUES
 (7, '07', 'SUROESTE'),
 (8, '08', 'NOROESTE');
 
-
-INSERT IGNORE INTO comunidades (code, name, region_id) VALUES
+-- Comunidades autónomas
+INSERT IGNORE INTO comunidad_autonoma (code, name, region_id) VALUES
 ('02-01', 'Andalucía', 2),
 ('07-01', 'Castilla y León', 7),
 ('06-01', 'Cataluña', 6),
@@ -22,7 +22,8 @@ INSERT IGNORE INTO comunidades (code, name, region_id) VALUES
 ('08-02', 'Murcia', 8),
 ('07-02', 'Galicia', 7);
 
-INSERT IGNORE INTO provincias (code, name, comunidad_id) VALUES
+-- Provincias
+INSERT IGNORE INTO province (code, name, comunidad_id) VALUES
 ('02-01-01', 'Sevilla', 1),
 ('02-01-02', 'Málaga', 1),
 ('02-01-03', 'Granada', 1),

@@ -5,14 +5,13 @@
 <header th:replace="fragments/header :: header"></header>
 
 <main class="container mt-5">
-    <h1 th:text="${provincia.id == null ? 'Add New Province' : 'Edit Province'}"></h1>
+    <h1 th:text="${province.id == null ? 'Add New Province' : 'Edit Province'}"></h1>
 
-    <div th:if="${errorMessage}" class="alert alert-danger">
-        <p th:text="${errorMessage}"></p>
-    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
-    <form th:action="${provincia.id == null} ? @{/provinces/insert} : @{/provinces/update}"
-          th:object="${provincia}" method="post" class="mt-4">
+    <form th:object="${province}" method="post"
+          th:action="@{${province.id == null} ? '/provinces/insert' : '/provinces/update'}"
+          class="mt-4">
 
         <input type="hidden" th:field="*{id}" />
 
@@ -27,8 +26,8 @@
         </div>
 
         <div class="mb-3">
-            <label for="comunidadId" class="form-label">Autonomous Community:</label>
-            <select th:field="*{comunidadId}" id="comunidadId" class="form-select" required>
+            <label for="comunidadAutonoma" class="form-label">Autonomous Community:</label>
+            <select th:field="*{comunidadAutonoma}" id="comunidadAutonoma" class="form-select" required>
                 <option value="">-- Select a Community --</option>
                 <option th:each="comunidad : ${comunidades}"
                         th:value="${comunidad.id}"
@@ -38,7 +37,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary"
-                th:text="${provincia.id == null ? 'Create' : 'Update'}"></button>
+                th:text="${province.id == null ? 'Create' : 'Update'}"></button>
     </form>
 
     <a th:href="@{/provinces}" class="btn btn-secondary mt-3">Back To List</a>
@@ -47,4 +46,6 @@
 <footer th:replace="fragments/footer :: footer"></footer>
 </body>
 </html>
+
+
 

@@ -1,52 +1,42 @@
 package com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.entities;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * La clase `ComunidadAutonoma` representa una entidad que modela una comunidad autónoma dentro de la base de datos.
- * Contiene cuatro campos: `id`, `code`, `name` y `regionId`, donde:
- * - `id` es el identificador único de la comunidad autónoma.
- * - `code` es un código asociado a la comunidad.
- * - `name` es el nombre de la comunidad.
- * - `regionId` representa la región a la que pertenece esta comunidad.
- *
- * Las anotaciones de Lombok ayudan a reducir el código repetitivo al generar automáticamente
- * métodos comunes como getters, setters, constructores y otros métodos estándar.
- */
+import java.util.List;
+
+@Entity
+@Table(name = "comunidad_autonoma")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ComunidadAutonoma {
 
-    // Campo que almacena el identificador único de la comunidad autónoma.
-    // Normalmente es autogenerado por la base de datos.
-    private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    // Campo que almacena el código de la comunidad autónoma, normalmente una cadena corta.
-    // Ejemplo: "AND" para Andalucía.
+    @Column(nullable = false, unique = true)
     private String code;
 
-    // Campo que almacena el nombre completo de la comunidad autónoma.
-    // Ejemplo: "Andalucía", "Cataluña".
+    @Column(nullable = false)
     private String name;
 
-    // Campo que almacena el identificador de la región a la que pertenece esta comunidad.
-    // Es una clave foránea hacia la tabla `Region`.
-    private Long regionId;
+    // Relación ManyToOne hacia Region
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id", nullable = false)
+    private Region region;
 
-    /**
-     * Constructor personalizado sin el campo `id`.
-     * Se utiliza para crear instancias antes de insertar en la base de datos.
-     *
-     * @param code Código de la comunidad autónoma.
-     * @param name Nombre de la comunidad autónoma.
-     * @param regionId Identificador de la región a la que pertenece.
-     */
-    public ComunidadAutonoma(String code, String name, Long regionId) {
+    // Relación uno a muchos con Provinces
+    @OneToMany(mappedBy = "comunidadAutonoma", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Province> provinces;
+
+    public ComunidadAutonoma(String code, String name, Region region) {
         this.code = code;
         this.name = name;
-        this.regionId = regionId;
+        this.region = region;
     }
 }
+
