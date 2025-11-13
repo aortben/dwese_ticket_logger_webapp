@@ -3,6 +3,7 @@ package com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.controlle
 
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.dao.RegionDAO;
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.entities.Region;
+import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.services.FileStorageService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,6 +33,9 @@ public class RegionController {
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     /**
      * Lista todas las regiones y las pasa como atributo al modelo para que sean
@@ -92,7 +97,7 @@ public class RegionController {
      * @return Redirección a la lista de regiones.
      */
     @PostMapping("/insert")
-    public String insertRegion(@Valid @ModelAttribute("region") Region region, BindingResult result, RedirectAttributes redirectAttributes, Locale locale) {
+    public String insertRegion(@Valid @ModelAttribute("category") Region region, BindingResult result, @RequestParam("imageFile") MultipartFile imageFile, RedirectAttributes redirectAttributes, Locale locale, Model model) {
         logger.info("Insertando nueva región con código {}", region.getCode());
         if (result.hasErrors()) {
             return "region-form"; // Devuelve el formulario para mostrar loserrores de validación
@@ -103,6 +108,12 @@ public class RegionController {
             String errorMessage = messageSource.getMessage("msg.regioncontroller.insert.codeExist", null, locale);
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             return "redirect:/regions/new";
+        }
+        if (!imageFile.isEmpty()) {
+            String fileName = fileStorageService.saveFile(imageFile);
+            if (fileName != null) {
+                region.setImage(fileName); // Guardar el nombre del archivo en laentidad
+            }
         }
         regionDAO.insertRegion(region);
         logger.info("Región {} insertada con éxito.", region.getCode());
@@ -117,7 +128,7 @@ public class RegionController {
      * @return Redirección a la lista de regiones.
      */
     @PostMapping("/update")
-    public String updateRegion(@Valid @ModelAttribute("region") Region region, BindingResult result, RedirectAttributes redirectAttributes, Locale locale) {
+    public String updateRegion(@Valid @ModelAttribute("category") Region region, BindingResult result, @RequestParam("imageFile") MultipartFile imageFile, RedirectAttributes redirectAttributes, Locale locale, Model model) {
         logger.info("Actualizando región con ID {}", region.getId());
         if (result.hasErrors()) {
             return "region-form"; // Devuelve el formulario para mostrar los errores de validación
@@ -128,8 +139,21 @@ public class RegionController {
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             return "redirect:/regions/edit?id=" + region.getId();
         }
+        if (!imageFile.isEmpty()) {
+            String fileName = fileStorageService.saveFile(imageFile);
+            if (fileName != null) {
+                region.setImage(fileName); // Guardar el nombre del archivo en laentidad
+            }
+        }
         regionDAO.updateRegion(region);
         logger.info("Región con ID {} actualizada con éxito.", region.getId());
+        return "redirect:/regions"; // Redirigir a la lista de regiones
+    }
+
+    public String deleteRegion(@RequestParam("id") Integer id, RedirectAttributes redirectAttributes) {
+        logger.info("Eliminando región con ID {}", id);
+        regionDAO.deleteRegion(id);
+        logger.info("Región con ID {} eliminada con éxito.", id);
         return "redirect:/regions"; // Redirigir a la lista de regiones
     }
 }

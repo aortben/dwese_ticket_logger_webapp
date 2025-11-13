@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/head :: head('Ticket Logger - Insertar/Actualizar Región')"></head>
+<head th:replace="~{fragments/head :: head('Ticket Logger - Insertar/Actualizar Región')}"></head>
 <body>
 <header th:replace="fragments/header :: header"></header>
 
@@ -9,9 +9,10 @@
 
     <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
-    <form th:object="${region}" method="post"
-          th:action="@{${region.id == null} ? '/regions/insert' : '/regions/update'}"
+    <form th:action="${region.id == null} ? @{/regions/insert} : @{/regions/update}"
+          th:object="${region}" method="post" enctype="multipart/form-data"
           class="mt-4">
+
         <input type="hidden" th:field="*{id}" />
 
         <div class="mb-3">
@@ -28,13 +29,17 @@
                  th:errors="*{name}"></div>
         </div>
 
-        <!-- Imagen comentada porque Region no tiene la propiedad 'image' -->
-        <!--
         <div class="mb-3">
             <label for="imageFile" class="form-label">Image</label>
             <input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*"/>
+
+            <div th:if="${region.image != null}" class="mt-2">
+                <p>Current image:</p>
+                <img th:src="@{'/uploads/' + ${region.image}}"
+                     alt="Region image preview"
+                     style="width: 120px; height: 120px; object-fit: cover;" />
+            </div>
         </div>
-        -->
 
         <button type="submit" class="btn btn-primary"
                 th:text="${region.id == null ? 'Create' : 'Update'}"></button>

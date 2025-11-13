@@ -15,6 +15,8 @@
             <th th:text="#{msg.region.id}">ID</th>
             <th th:text="#{msg.region.code}">Code</th>
             <th th:text="#{msg.region.name}">Name</th>
+            <th th:text="#{msg.region.image}">Image</th>
+            <th th:text="#{msg.region.provinces}"># Provinces</th>
             <th th:text="#{msg.region.actions}">Actions</th>
         </tr>
         </thead>
@@ -23,6 +25,14 @@
             <td th:text="${region.id}"></td>
             <td th:text="${region.code}"></td>
             <td th:text="${region.name}"></td>
+            <td>
+                <img th:if="${region.image != null}"
+                     th:src="@{'/uploads/' + ${region.image}}"
+                     alt="Region image"
+                     style="width: 100px; height: 100px; object-fit: cover;" />
+                <span th:if="${region.image == null}" th:text="#{msg.category.noImage}">No image</span>
+            </td>
+            <td th:text="${region.provinces != null ? region.provinces.size() : 0}"></td>
             <td>
                 <a th:href="@{/regions/edit(id=${region.id})}"
                    class="btn btn-primary btn-sm"
@@ -37,17 +47,6 @@
                     </button>
                 </form>
             </td>
-
-            <!-- Imagen comentada porque Region no tiene la propiedad 'image' -->
-            <!--
-            <td>
-                <img th:if="${region.image != null}"
-                     th:src="@{'/uploads/' + ${region.image}}"
-                     alt="Imagen de la región"
-                     style="width: 100px; height: 100px; object-fit: cover;" />
-                <span th:if="${region.image == null}" th:text="#{msg.category.noImage}"></span>
-            </td>
-            -->
         </tr>
         </tbody>
     </table>
@@ -59,4 +58,5 @@
 <footer th:replace="fragments/footer :: footer"></footer>
 </body>
 </html>
+
 

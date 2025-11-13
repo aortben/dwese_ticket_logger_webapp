@@ -1,38 +1,41 @@
 package com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.dao;
 
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.entities.Province;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.entities.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import java.util.List;
 
 @Repository
 @Transactional
-public class ProvinceDAOImpl implements com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.dao.ProvinceDAO {
+public class ProvinceDAOImpl implements ProvinceDAO {
 
+    // Logger para registrar eventos importantes en el DAO
     private static final Logger logger = LoggerFactory.getLogger(ProvinceDAOImpl.class);
 
     @PersistenceContext
     private EntityManager entityManager;
 
     /**
-     * Lista todas las provincias, cargando también ComunidadAutonoma y Region.
+     * Lista todas las provincias de la base de datos.
+     * @return Lista de provincias
      */
     @Override
     public List<Province> listAllProvinces() {
         logger.info("Listing all provinces from the database.");
-        String query = "SELECT p FROM Province p JOIN FETCH p.comunidadAutonoma c JOIN FETCH c.region";
+        String query = "SELECT p FROM Province p JOIN FETCH p.region";
         List<Province> provinces = entityManager.createQuery(query, Province.class).getResultList();
         logger.info("Retrieved {} provinces from the database.", provinces.size());
         return provinces;
     }
 
     /**
-     * Inserta una nueva provincia.
+     * Inserta una nueva provincia en la base de datos.
+     * @param province Provincia a insertar
      */
     @Override
     public void insertProvince(Province province) {
@@ -42,7 +45,8 @@ public class ProvinceDAOImpl implements com.org.iesalixar.daw2.OrtegaAlvaro.dwes
     }
 
     /**
-     * Actualiza una provincia existente.
+     * Actualiza una provincia existente en la base de datos.
+     * @param province Provincia a actualizar
      */
     @Override
     public void updateProvince(Province province) {
@@ -52,7 +56,8 @@ public class ProvinceDAOImpl implements com.org.iesalixar.daw2.OrtegaAlvaro.dwes
     }
 
     /**
-     * Elimina una provincia por su ID.
+     * Elimina una provincia de la base de datos.
+     * @param id ID de la provincia a eliminar
      */
     @Override
     public void deleteProvince(int id) {
@@ -67,21 +72,26 @@ public class ProvinceDAOImpl implements com.org.iesalixar.daw2.OrtegaAlvaro.dwes
     }
 
     /**
-     * Obtiene una provincia por su ID, incluyendo ComunidadAutonoma y Region.
+     * Obtiene una provincia por su ID.
+     * @param id ID de la provincia
+     * @return Provincia correspondiente al ID
      */
     @Override
     public Province getProvinceById(int id) {
         logger.info("Retrieving province by id: {}", id);
-        String query = "SELECT p FROM Province p JOIN FETCH p.comunidadAutonoma c JOIN FETCH c.region WHERE p.id = :id";
-        Province province = entityManager.createQuery(query, Province.class)
-                .setParameter("id", id)
-                .getSingleResult();
-        logger.info("Province retrieved: {} - {}", province.getCode(), province.getName());
+        Province province = entityManager.find(Province.class, id);
+        if (province != null) {
+            logger.info("Province retrieved: {} - {}", province.getCode(), province.getName());
+        } else {
+            logger.warn("No province found with id: {}", id);
+        }
         return province;
     }
 
     /**
-     * Comprueba si existe una provincia con un código específico.
+     * Verifica si una provincia con el código especificado ya existe en la base de datos.
+     * @param code el código de la provincia a verificar.
+     * @return true si una provincia con el código ya existe, false de lo contrario.
      */
     @Override
     public boolean existsProvinceByCode(String code) {
@@ -96,7 +106,11 @@ public class ProvinceDAOImpl implements com.org.iesalixar.daw2.OrtegaAlvaro.dwes
     }
 
     /**
-     * Comprueba si existe una provincia con un código específico, excluyendo un ID.
+     * Verifica si una provincia con el código especificado ya existe en la base de datos,
+     * excluyendo una provincia con un ID específico.
+     * @param code el código de la provincia a verificar.
+     * @param id el ID de la provincia a excluir de la verificación.
+     * @return true si una provincia con el código ya existe (y no es la provincia con el ID dado), false de lo contrario.
      */
     @Override
     public boolean existsProvinceByCodeAndNotId(String code, int id) {

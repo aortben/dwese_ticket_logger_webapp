@@ -1,29 +1,20 @@
--- Tabla de regiones
+DROP DATABASE IF EXISTS dwese_ticket_logger_webapp;
+CREATE DATABASE dwese_ticket_logger_webapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE dwese_ticket_logger_webapp;
+
 CREATE TABLE IF NOT EXISTS region (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(10) NOT NULL UNIQUE,
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    image VARCHAR(255)
 );
 
--- Tabla de comunidades autónomas
-CREATE TABLE IF NOT EXISTS comunidad_autonoma (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(10) UNIQUE NOT NULL,
+CREATE TABLE IF NOT EXISTS province (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(10) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     region_id INT NOT NULL,
-    CONSTRAINT fk_comunidad_region
+    CONSTRAINT fk_province_region
         FOREIGN KEY (region_id) REFERENCES region(id)
         ON DELETE CASCADE
 );
-
--- Tabla de provincias
-CREATE TABLE IF NOT EXISTS province (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(10) UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    comunidad_id INT NOT NULL,  -- 🔹 Solo aquí se cambia el nombre para que Hibernate lo reconozca
-    CONSTRAINT fk_province_comunidad
-        FOREIGN KEY (comunidad_id) REFERENCES comunidad_autonoma(id)
-        ON DELETE CASCADE
-);
-

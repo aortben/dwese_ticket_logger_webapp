@@ -4,15 +4,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "province")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Province {
@@ -22,8 +21,8 @@ public class Province {
     private int id;
 
     @NotEmpty(message = "{msg.province.code.notEmpty}")
-    @Size(max = 2, message = "{msg.province.code.size}")
-    @Column(name = "code", nullable = false, length = 2)
+    @Size(max = 10, message = "{msg.province.code.size}")
+    @Column(name = "code", nullable = false, length = 10, unique = true)
     private String code;
 
     @NotEmpty(message = "{msg.province.name.notEmpty}")
@@ -31,23 +30,23 @@ public class Province {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    // Relación ManyToOne con ComunidadAutonoma
-    @NotNull(message = "{msg.province.comunidadAutonoma.notNull}")
+    // Relación ManyToOne con Region
+    @NotNull(message = "{msg.province.region.notNull}")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comunidad_id", nullable = false)
-    private ComunidadAutonoma comunidadAutonoma;
+    @JoinColumn(name = "region_id", nullable = false)
+    private Region region;
 
-    // Relación opcional con Location
-    @OneToMany(mappedBy = "province", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Location> locations;
+    // Relación opcional con Location (si existe)
+   // @OneToMany(mappedBy = "province", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    //private List<Location> locations;
 
-    public Province(String code, String name, ComunidadAutonoma comunidadAutonoma) {
+    public Province(String code, String name, Region region) {
         this.code = code;
         this.name = name;
-        this.comunidadAutonoma = comunidadAutonoma;
+        this.region = region;
     }
 
-    public int getComunidadId() {
-        return comunidadAutonoma != null ? comunidadAutonoma.getId() : 0;
+    public int getRegionId() {
+        return region != null ? region.getId() : 0;
     }
 }

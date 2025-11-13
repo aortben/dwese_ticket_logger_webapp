@@ -26,12 +26,12 @@
         </div>
 
         <div class="mb-3">
-            <label for="comunidadAutonoma" class="form-label">Autonomous Community:</label>
-            <select th:field="*{comunidadAutonoma}" id="comunidadAutonoma" class="form-select" required>
-                <option value="">-- Select a Community --</option>
-                <option th:each="comunidad : ${comunidades}"
-                        th:value="${comunidad.id}"
-                        th:text="${comunidad.name}">
+            <label for="region" class="form-label">Region:</label>
+            <select th:field="*{region.id}" id="region" class="form-select" required>
+                <option value="">-- Select a Region --</option>
+                <option th:each="region : ${regions}"
+                        th:value="${region.id}"
+                        th:text="${region.name}">
                 </option>
             </select>
         </div>
@@ -46,6 +46,7 @@
 <footer th:replace="fragments/footer :: footer"></footer>
 </body>
 </html>
+
 
 
 

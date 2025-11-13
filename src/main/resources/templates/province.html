@@ -14,7 +14,6 @@
         <tr>
             <th>Code</th>
             <th>Name</th>
-            <th>Autonomous Community</th>
             <th>Region</th>
             <th>Actions</th>
         </tr>
@@ -23,8 +22,7 @@
         <tr th:each="province : ${listProvinces}">
             <td th:text="${province.code}">CODE</td>
             <td th:text="${province.name}">NAME</td>
-            <td th:text="${province.comunidadAutonoma.name}">COMUNIDAD</td>
-            <td th:text="${province.comunidadAutonoma.region.name}">REGION</td>
+            <td th:text="${province.region.name}">REGION</td>
             <td>
                 <a th:href="@{/provinces/edit(id=${province.id})}" class="btn btn-primary btn-sm">Edit</a>
 
@@ -47,4 +45,5 @@
 <footer th:replace="fragments/footer :: footer"></footer>
 </body>
 </html>
+
 
