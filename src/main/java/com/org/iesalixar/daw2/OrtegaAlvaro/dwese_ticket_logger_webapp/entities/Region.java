@@ -17,7 +17,7 @@ public class Region {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @NotEmpty(message = "{msg.region.code.notEmpty}")
     @Size(max = 10, message = "{msg.region.code.size}")

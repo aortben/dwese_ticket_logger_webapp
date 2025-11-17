@@ -18,7 +18,7 @@ public class Province {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @NotEmpty(message = "{msg.province.code.notEmpty}")
     @Size(max = 10, message = "{msg.province.code.size}")
@@ -46,7 +46,7 @@ public class Province {
         this.region = region;
     }
 
-    public int getRegionId() {
+    public Long getRegionId() {
         return region != null ? region.getId() : 0;
     }
 }

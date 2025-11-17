@@ -1,7 +1,7 @@
 package com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.controllers;
 
 
-import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.dao.RegionDAO;
+import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.repositories.RegionRepository;
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.entities.Region;
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.services.FileStorageService;
 import jakarta.validation.Valid;
@@ -15,9 +15,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.sql.SQLException;
+
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Controlador que maneja las operaciones CRUD para la entidad `Region`.
@@ -29,7 +30,7 @@ public class RegionController {
     private static final Logger logger = LoggerFactory.getLogger(RegionController.class);
     // DAO para gestionar las operaciones de las regiones en la base de datos
     @Autowired
-    private RegionDAO regionDAO;
+    private RegionRepository regionRepository;
 
     @Autowired
     private MessageSource messageSource;
@@ -50,7 +51,7 @@ public class RegionController {
     public String listRegions(Model model) {
         logger.info("Solicitando la lista de todas las regiones...");
         List<Region> listRegions = null;
-        listRegions = regionDAO.listAllRegions();
+        listRegions = regionRepository.findAll();
         logger.info("Se han cargado {} regiones.", listRegions.size());
         model.addAttribute("listRegions", listRegions); // Pasar la lista deregiones al modelo
         return "/region"; // Nombre de la plantilla Thymeleaf a renderizar
@@ -77,12 +78,12 @@ public class RegionController {
      * @return El nombre de la plantilla Thymeleaf para el formulario.
      */
     @GetMapping("/edit")
-    public String showEditForm(@RequestParam("id") int id, Model model) {
+    public String showEditForm(@RequestParam("id") Long id, Model model) {
         logger.info("Mostrando formulario de edición para la región con ID {}",
                 id);
         Region region = null;
-        region = regionDAO.getRegionById(id);
-        if (region == null) {
+        Optional<Region> regionOpt = regionRepository.findById(id);
+        if (regionOpt.isPresent()) {
             logger.warn("No se encontró la región con ID {}", id);
         }
         model.addAttribute("region", region);
@@ -102,7 +103,7 @@ public class RegionController {
         if (result.hasErrors()) {
             return "region-form"; // Devuelve el formulario para mostrar loserrores de validación
         }
-        if (regionDAO.existsRegionByCode(region.getCode())) {
+        if (regionRepository.existsRegionByCode(region.getCode())) {
             logger.warn("El código de la región {} ya existe.",
                     region.getCode());
             String errorMessage = messageSource.getMessage("msg.regioncontroller.insert.codeExist", null, locale);
@@ -115,7 +116,7 @@ public class RegionController {
                 region.setImage(fileName); // Guardar el nombre del archivo en laentidad
             }
         }
-        regionDAO.insertRegion(region);
+        regionRepository.save(region);
         logger.info("Región {} insertada con éxito.", region.getCode());
         return "redirect:/regions"; // Redirigir a la lista de regiones
     }
@@ -133,7 +134,7 @@ public class RegionController {
         if (result.hasErrors()) {
             return "region-form"; // Devuelve el formulario para mostrar los errores de validación
         }
-        if (regionDAO.existsRegionByCodeAndNotId(region.getCode(), region.getId())) {
+        if (regionRepository.existsRegionByCodeAndNotId(region.getCode(), region.getId())) {
             logger.warn("El código de la región {} ya existe para otra región.", region.getCode());
             String errorMessage = messageSource.getMessage("msg.regioncontroller.update.codeExist", null, locale);
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
@@ -145,14 +146,14 @@ public class RegionController {
                 region.setImage(fileName); // Guardar el nombre del archivo en laentidad
             }
         }
-        regionDAO.updateRegion(region);
+        regionRepository.save(region);
         logger.info("Región con ID {} actualizada con éxito.", region.getId());
         return "redirect:/regions"; // Redirigir a la lista de regiones
     }
 
-    public String deleteRegion(@RequestParam("id") Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteRegion(@RequestParam("id") Long id, RedirectAttributes redirectAttributes) {
         logger.info("Eliminando región con ID {}", id);
-        regionDAO.deleteRegion(id);
+        regionRepository.deleteById(id);
         logger.info("Región con ID {} eliminada con éxito.", id);
         return "redirect:/regions"; // Redirigir a la lista de regiones
     }
