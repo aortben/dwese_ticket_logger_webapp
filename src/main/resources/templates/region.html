@@ -1,62 +1,102 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/head :: head(#{msg.region.title})"></head>
+<head th:replace="fragments/head :: head ('Ticket Logger - Listado de Comunidades Autónomas')"></head>
 <body>
+
+<!-- Incluir el fragmento del header -->
 <header th:replace="fragments/header :: header"></header>
 
 <main class="container mt-5">
-    <h1 th:text="#{msg.region.header}">Regions</h1>
+    <h1 class="title" th:text="#{msg.region.title}"></h1>
 
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div th:replace="region-filter :: regionFilter(${search}, ${sort}, ${currentPage})"></div>
 
-    <table class="table table-bordered mt-3">
-        <thead>
-        <tr>
-            <th th:text="#{msg.region.id}">ID</th>
-            <th th:text="#{msg.region.code}">Code</th>
-            <th th:text="#{msg.region.name}">Name</th>
-            <th th:text="#{msg.region.image}">Image</th>
-            <th th:text="#{msg.region.provinces}"># Provinces</th>
-            <th th:text="#{msg.region.actions}">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="region : ${listRegions}">
-            <td th:text="${region.id}"></td>
-            <td th:text="${region.code}"></td>
-            <td th:text="${region.name}"></td>
-            <td>
-                <img th:if="${region.image != null}"
-                     th:src="@{'/uploads/' + ${region.image}}"
-                     alt="Region image"
-                     style="width: 100px; height: 100px; object-fit: cover;" />
-                <span th:if="${region.image == null}" th:text="#{msg.category.noImage}">No image</span>
-            </td>
-            <td th:text="${region.provinces != null ? region.provinces.size() : 0}"></td>
-            <td>
-                <a th:href="@{/regions/edit(id=${region.id})}"
-                   class="btn btn-primary btn-sm"
-                   th:text="#{msg.region.edit}">Edit</a>
+    <!-- Muestra un mensaje de error si hay algún problema -->
+    <div class="alert alert-danger" th:if="${errorMessage}">
+        <p th:text="${errorMessage}"></p>
+    </div>
 
-                <form th:action="@{/regions/delete}" method="post" class="d-inline">
-                    <input type="hidden" name="id" th:value="${region.id}"/>
-                    <button type="submit" class="btn btn-danger btn-sm"
-                            th:text="#{msg.region.delete}"
-                            th:onclick="|return confirm('#{msg.region.confirmDelete}');|">
-                        Delete
-                    </button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <!-- Muestra la lista de regiones en una tabla -->
+    <div style="height: 65%;">
+        <table class="table table-bordered mt-3">
+            <thead>
+            <tr>
+                <th th:text="#{msg.region.id}"></th>
+                <th th:text="#{msg.region.code}"></th>
+                <th th:text="#{msg.region.name}"></th>
+                <th th:text="#{msg.region.image}"></th>
+                <th th:text="#{msg.region.actions}">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="region : ${listRegions}">
+                <td th:text="${region.id}"></td>
+                <td th:text="${region.code}"></td>
+                <td th:text="${region.name}"></td>
+                <td>
+                    <img alt="Imagen de la categoría"
+                         style="width: 100px; height: 100px; object-fit: cover;"
+                         th:if="${region.image != null}"
+                         th:src="@{'/uploads/' + ${region.image}}"/>
+                    <span th:if="${region.image == null}" th:text="#{msg.region.noImage}"></span>
+                </td>
+                <td>
+                    <!-- Botón para editar -->
+                    <a class="btn btn-primary btn-sm" th:href="@{/regions/edit(id=${region.id})}"
+                       th:text="#{msg.region.edit}"></a>
+                    <!-- Botón para eliminar -->
+                    <form class="d-inline" method="post" th:action="@{/regions/delete}">
+                        <input name="id" th:value="${region.id}" type="hidden"/>
+                        <button class="btn btn-danger btn-sm" th:onclick="|return confirm(#{msg.region.confirm});|"
+                                th:text="#{msg.region.delete}" type="submit">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <a th:href="@{/regions/new}" class="btn btn-success mt-3" th:text="#{msg.region.addNew}">Add New Region</a>
-    <a th:href="@{/}" class="btn btn-secondary mt-3" th:text="#{msg.region.backHome}">Back to Home</a>
+    <!-- Sección de paginación -->
+    <nav aria-label="Page navigation" class="mt-4" th:if="${totalPages > 1}">
+        <ul class="pagination justify-content-center">
+
+            <!-- Botón "Anterior" -->
+            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                <a aria-label="Previous"
+                   class="page-link"
+                   th:href="${#strings.isEmpty(search)} ? @{/regions(page=${currentPage - 1}, sort=${sort})} :  @{/regions(page=${currentPage - 1}, search=${search}, sort=${sort})}">&laquo;</a>
+            </li>
+
+            <!-- Números de página -->
+            <li class="page-item" th:classappend="${i == currentPage} ? 'active'"
+                th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a class="page-link"
+                   th:href="${#strings.isEmpty(search)} ? @{/regions(page=${i}, sort=${sort})} :  @{/regions(page=${i}, search=${search}, sort=${sort})}"
+                   th:text="${i}"></a>
+            </li>
+
+            <!-- Botón "Siguiente" -->
+            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                <a aria-label="Next" class="page-link"
+                   th:href="${#strings.isEmpty(search)} ? @{/regions(page=${currentPage + 1}, sort=${sort})} :  @{/regions(page=${currentPage + 1}, search=${search}, sort=${sort})}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+
+
+    <div class="sticky-buttons" style=" margin-top: auto !important;">
+        <!-- Botón para añadir una nueva región -->
+        <a class="btn btn-success mt-3" th:href="@{/regions/new}" th:text="#{msg.region.add}"></a>
+        <!-- Volver a la página principal -->
+        <a class="btn btn-secondary mt-3" href="#" th:href="@{/static}" th:text="#{msg.region.returnback}"></a>
+    </div>
 </main>
 
+<!-- Incluir el fragmento del footer -->
 <footer th:replace="fragments/footer :: footer"></footer>
+
 </body>
 </html>
-
 

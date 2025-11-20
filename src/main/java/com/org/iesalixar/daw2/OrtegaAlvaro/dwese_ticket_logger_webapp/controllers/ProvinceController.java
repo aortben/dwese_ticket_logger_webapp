@@ -1,11 +1,16 @@
 package com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.controllers;
 
+
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.repositories.ProvinceRepository;
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.repositories.RegionRepository;
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.entities.Province;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,19 +28,36 @@ public class ProvinceController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProvinceController.class);
 
+    public int currentPage = 1;
+    public String sort = "idAsc";
+    public String search = "";
+
     @Autowired
     private ProvinceRepository provinceRepository;
 
     @Autowired
     private RegionRepository regionRepository;
 
-    @GetMapping
-    public String listProvinces(Model model) {
-        logger.info("Solicitando la lista de todas las provincias...");
-        List<Province> listProvinces = provinceRepository.findAll();
-        model.addAttribute("listProvinces", listProvinces);
-        logger.info("Se han cargado {} provincias.", listProvinces.size());
-        return "/province";
+    @GetMapping()
+    public String listProvinces(@RequestParam(defaultValue = "1") int page, @RequestParam(required = false) String search, @RequestParam(required = false) String sort, Model model) {
+        logger.info("Solicitando la lista de todas las provincias..." + search);
+        Pageable pageable = PageRequest.of(page - 1, 5, getSort(sort));
+        Page<Province> provinces;
+        int totalPages = 0;
+        if (search != null && !search.isBlank()) {
+            provinces = provinceRepository.findByNameContainingIgnoreCase(search, pageable);
+            totalPages = (int) Math.ceil((double) regionRepository.countByNameContainingIgnoreCase(search) / 5);
+        } else {
+            provinces = provinceRepository.findAll(pageable);
+            totalPages = (int) Math.ceil((double) regionRepository.count() / 5);
+        }
+        logger.info("Se han cargado {} provincias.", provinces.toList().size());
+        model.addAttribute("listProvinces", provinces.toList());
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("search", search);
+        model.addAttribute("sort", sort);
+        return "province"; // Nombre de la plantilla Thymeleaf a renderizar
     }
 
     @GetMapping("/new")
@@ -88,6 +110,20 @@ public class ProvinceController {
         provinceRepository.deleteById(id);
         logger.info("Provincia eliminada correctamente.");
         return "redirect:/provinces";
+    }
+
+    private Sort getSort(String sort) {
+        if (sort == null) {
+            return Sort.by("id").ascending();
+        }
+        return switch (sort) {
+            case "nameAsc" -> Sort.by("name").ascending();
+            case "nameDesc" -> Sort.by("name").descending();
+            case "codeAsc" -> Sort.by("code").ascending();
+            case "codeDesc" -> Sort.by("code").descending();
+            case "idDesc" -> Sort.by("id").descending();
+            default -> Sort.by("id").ascending();
+        };
     }
 }
 

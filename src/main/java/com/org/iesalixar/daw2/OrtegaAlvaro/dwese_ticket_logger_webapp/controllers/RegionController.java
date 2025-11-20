@@ -1,14 +1,19 @@
 package com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.controllers;
 
 
-import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.repositories.RegionRepository;
+
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.entities.Region;
+import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.repositories.RegionRepository;
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.services.FileStorageService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -27,14 +31,16 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/regions")
 public class RegionController {
+
     private static final Logger logger = LoggerFactory.getLogger(RegionController.class);
+    public int currentPage = 1;
+    public String sort = "idAsc";
+    public String search = "";
+    @Autowired
+    private MessageSource messageSource;
     // DAO para gestionar las operaciones de las regiones en la base de datos
     @Autowired
     private RegionRepository regionRepository;
-
-    @Autowired
-    private MessageSource messageSource;
-
     @Autowired
     private FileStorageService fileStorageService;
 
@@ -43,18 +49,28 @@ public class RegionController {
      * accesibles en la vista `region.html`.
      *
      * @param model Objeto del modelo para pasar datos a la vista.
-     * @return El nombre de la plantilla Thymeleaf para renderizar la lista de
-     * regiones.
+     * @return El nombre de la plantilla Thymeleaf para renderizar la lista de regiones.
      */
-
-    @GetMapping
-    public String listRegions(Model model) {
-        logger.info("Solicitando la lista de todas las regiones...");
-        List<Region> listRegions = null;
-        listRegions = regionRepository.findAll();
-        logger.info("Se han cargado {} regiones.", listRegions.size());
-        model.addAttribute("listRegions", listRegions); // Pasar la lista deregiones al modelo
-        return "/region"; // Nombre de la plantilla Thymeleaf a renderizar
+    @GetMapping()
+    public String listRegions(@RequestParam(defaultValue = "1") int page, @RequestParam(required = false) String search, @RequestParam(required = false) String sort, Model model) {
+        logger.info("Solicitando la lista de todas las regiones..." + search);
+        Pageable pageable = PageRequest.of(page - 1, 5, getSort(sort));
+        Page<Region> regions;
+        int totalPages = 0;
+        if (search != null && !search.isBlank()) {
+            regions = regionRepository.findByNameContainingIgnoreCase(search, pageable);
+            totalPages = (int) Math.ceil((double) regionRepository.countByNameContainingIgnoreCase(search) / 5);
+        } else {
+            regions = regionRepository.findAll(pageable);
+            totalPages = (int) Math.ceil((double) regionRepository.count() / 5);
+        }
+        logger.info("Se han cargado {} regiones.", regions.toList().size());
+        model.addAttribute("listRegions", regions.toList()); // Pasar la lista de regiones al modelo
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("search", search);
+        model.addAttribute("sort", sort);
+        return "region"; // Nombre de la plantilla Thymeleaf a renderizar
     }
 
     /**
@@ -66,8 +82,8 @@ public class RegionController {
     @GetMapping("/new")
     public String showNewForm(Model model) {
         logger.info("Mostrando formulario para nueva región.");
-        model.addAttribute("region", new Region()); // Crear un nuevo objetoRegion
-        return "/region-form"; // Nombre de la plantilla Thymeleaf para elformulario
+        model.addAttribute("region", new Region()); // Crear un nuevo objeto Region
+        return "region-form"; // Nombre de la plantilla Thymeleaf para el formulario
     }
 
     /**
@@ -79,15 +95,13 @@ public class RegionController {
      */
     @GetMapping("/edit")
     public String showEditForm(@RequestParam("id") Long id, Model model) {
-        logger.info("Mostrando formulario de edición para la región con ID {}",
-                id);
-        Region region = null;
+        logger.info("Mostrando formulario de edición para la región con ID {}", id);
         Optional<Region> regionOpt = regionRepository.findById(id);
-        if (regionOpt.isPresent()) {
+        if (!regionOpt.isPresent()) {
             logger.warn("No se encontró la región con ID {}", id);
         }
-        model.addAttribute("region", region);
-        return "/region-form"; // Nombre de la plantilla Thymeleaf para elformulario
+        model.addAttribute("region", regionOpt.get());
+        return "region-form"; // Nombre de la plantilla Thymeleaf para el formulario
     }
 
     /**
@@ -98,22 +112,21 @@ public class RegionController {
      * @return Redirección a la lista de regiones.
      */
     @PostMapping("/insert")
-    public String insertRegion(@Valid @ModelAttribute("category") Region region, BindingResult result, @RequestParam("imageFile") MultipartFile imageFile, RedirectAttributes redirectAttributes, Locale locale, Model model) {
+    public String insertRegion(@Valid @ModelAttribute("region") Region region, BindingResult result, @RequestParam("imageFile") MultipartFile imageFile, RedirectAttributes redirectAttributes, Locale locale) {
         logger.info("Insertando nueva región con código {}", region.getCode());
         if (result.hasErrors()) {
-            return "region-form"; // Devuelve el formulario para mostrar loserrores de validación
+            return "region-form";  // Devuelve el formulario para mostrar los errores de validación
         }
         if (regionRepository.existsRegionByCode(region.getCode())) {
-            logger.warn("El código de la región {} ya existe.",
-                    region.getCode());
-            String errorMessage = messageSource.getMessage("msg.regioncontroller.insert.codeExist", null, locale);
+            logger.warn("El código de la región {} ya existe.", region.getCode());
+            String errorMessage = messageSource.getMessage("msg.region-controller.insert.codeExist", null, locale);
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             return "redirect:/regions/new";
         }
         if (!imageFile.isEmpty()) {
             String fileName = fileStorageService.saveFile(imageFile);
             if (fileName != null) {
-                region.setImage(fileName); // Guardar el nombre del archivo en laentidad
+                region.setImage(fileName); // Guardar el nombre del archivo en la entidad
             }
         }
         regionRepository.save(region);
@@ -129,21 +142,21 @@ public class RegionController {
      * @return Redirección a la lista de regiones.
      */
     @PostMapping("/update")
-    public String updateRegion(@Valid @ModelAttribute("category") Region region, BindingResult result, @RequestParam("imageFile") MultipartFile imageFile, RedirectAttributes redirectAttributes, Locale locale, Model model) {
+    public String updateRegion(@Valid @ModelAttribute("region") Region region, BindingResult result, @RequestParam("imageFile") MultipartFile imageFile, RedirectAttributes redirectAttributes, Locale locale) {
         logger.info("Actualizando región con ID {}", region.getId());
         if (result.hasErrors()) {
-            return "region-form"; // Devuelve el formulario para mostrar los errores de validación
+            return "region-form";  // Devuelve el formulario para mostrar los errores de validación
         }
-        if (regionRepository.existsRegionByCodeAndNotId(region.getCode(), region.getId())) {
+        /*if (regionRepository.existsRegionByCodeAndNotId(region.getCode(), region.getId())) {
             logger.warn("El código de la región {} ya existe para otra región.", region.getCode());
-            String errorMessage = messageSource.getMessage("msg.regioncontroller.update.codeExist", null, locale);
+            String errorMessage = messageSource.getMessage("msg.region-controller.update.codeExist", null, locale);
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             return "redirect:/regions/edit?id=" + region.getId();
-        }
+        }*/
         if (!imageFile.isEmpty()) {
             String fileName = fileStorageService.saveFile(imageFile);
             if (fileName != null) {
-                region.setImage(fileName); // Guardar el nombre del archivo en laentidad
+                region.setImage(fileName); // Guardar el nombre del archivo en la entidad
             }
         }
         regionRepository.save(region);
@@ -151,10 +164,33 @@ public class RegionController {
         return "redirect:/regions"; // Redirigir a la lista de regiones
     }
 
+
+    /**
+     * Elimina una región de la base de datos.
+     *
+     * @param id                 ID de la región a eliminar.
+     * @param redirectAttributes Atributos para mensajes flash de redirección.
+     * @return Redirección a la lista de regiones.
+     */
+    @PostMapping("/delete")
     public String deleteRegion(@RequestParam("id") Long id, RedirectAttributes redirectAttributes) {
         logger.info("Eliminando región con ID {}", id);
         regionRepository.deleteById(id);
         logger.info("Región con ID {} eliminada con éxito.", id);
         return "redirect:/regions"; // Redirigir a la lista de regiones
+    }
+
+    private Sort getSort(String sort) {
+        if (sort == null) {
+            return Sort.by("id").ascending();
+        }
+        return switch (sort) {
+            case "nameAsc" -> Sort.by("name").ascending();
+            case "nameDesc" -> Sort.by("name").descending();
+            case "codeAsc" -> Sort.by("code").ascending();
+            case "codeDesc" -> Sort.by("code").descending();
+            case "idDesc" -> Sort.by("id").descending();
+            default -> Sort.by("id").ascending();
+        };
     }
 }
