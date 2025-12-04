@@ -3,6 +3,7 @@ package com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.demo;
 import com.org.iesalixar.daw2.OrtegaAlvaro.dwese_ticket_logger_webapp.HelloController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
 import static
@@ -12,7 +13,10 @@ import static
 import static
         org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
+
 @WebMvcTest(HelloController.class) // Esta anotación indica que estamos probando solo el controlador HelloController
+@AutoConfigureMockMvc(addFilters = false) // Desactiva filtros de seguridad
 public class HelloControllerTest {
     // Inyecta MockMvc para realizar peticiones simuladas
     @Autowired
